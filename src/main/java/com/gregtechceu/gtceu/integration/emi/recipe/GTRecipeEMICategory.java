@@ -7,14 +7,17 @@ import com.gregtechceu.gtceu.api.recipe.category.GTRecipeCategory;
 import com.gregtechceu.gtceu.api.registry.GTRegistries;
 import com.gregtechceu.gtceu.common.data.GTRecipeTypes;
 
-import com.lowdragmc.lowdraglib.emi.IGui2Renderable;
+import com.lowdragmc.lowdraglib.gui.texture.ResourceTexture;
 
 import net.minecraft.Util;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.Items;
 
 import dev.emi.emi.api.EmiRegistry;
 import dev.emi.emi.api.recipe.EmiRecipeCategory;
 import dev.emi.emi.api.recipe.VanillaEmiRecipeCategories;
+import dev.emi.emi.api.render.EmiRenderable;
+import dev.emi.emi.api.render.EmiTexture;
 import dev.emi.emi.api.stack.EmiStack;
 
 import java.util.function.Function;
@@ -26,8 +29,18 @@ public class GTRecipeEMICategory extends EmiRecipeCategory {
     private final GTRecipeCategory category;
 
     private GTRecipeEMICategory(GTRecipeCategory category) {
-        super(category.registryKey, IGui2Renderable.toDrawable(category.getIcon(), 16, 16));
+        super(category.registryKey, getDrawable(category));
         this.category = category;
+    }
+
+    public static EmiRenderable getDrawable(GTRecipeCategory category) {
+        if (category.getIcon() instanceof ResourceTexture tex) {
+            return new EmiTexture(tex.imageLocation, 0, 0, 16, 16,
+                    (int) tex.imageWidth, (int) tex.imageHeight, (int) tex.imageWidth, (int) tex.imageHeight);
+        } else if (category.getRecipeType().getIconSupplier() != null)
+            return EmiStack.of(category.getRecipeType().getIconSupplier().get());
+        else
+            return EmiStack.of(Items.BARRIER);
     }
 
     public static void registerDisplays(EmiRegistry registry) {
